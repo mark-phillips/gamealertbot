@@ -1,0 +1,7 @@
+cron:
+- description: 3 minute check for games
+  url: /
+  schedule: every 3 minutes
+- description: 1 minute check for tweets
+  url: /twitter
+  schedule: every 1 minutes

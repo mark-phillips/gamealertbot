@@ -6,4 +6,4 @@ class twitter_auth(db.Model):
     Access_token = db.StringProperty()
     Access_token_secret = db.StringProperty()
     last_status_id = db.IntegerProperty()
-#    last_dm_id = db.IntegerProperty()
+    last_dm_id = db.IntegerProperty()

@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+from google.appengine.api import xmpp
 from google.appengine.api import users
 from google.appengine.ext import db
+from google.appengine.ext.webapp import xmpp_handlers
 
 import re, string, time
 logging.basicConfig(level=logging.DEBUG,)
@@ -33,8 +35,8 @@ XMPP_HELP_MSG = ("I am the game alert bot.  Use the following commands to contro
             "\n   'list games' - Get a list of all games for your registered users"
             "\To see all games and users being monitored go to %s")
 
-class bot():
-  """Respond to user requests"""
+class XmppHandler(xmpp_handlers.CommandHandler):
+  """Handler class for all XMPP activity."""
 
   def help(self, message=None,message_subcmd=None):
     logging.debug(  "processing 'help' command" )
@@ -53,7 +55,7 @@ class bot():
 
   #
   #  Process incoming message
-  def text_message(self, message=None,responder):
+  def text_message(self, message=None):
     logging.debug(  "processing command" )
     printhelp = True
     message_subcmd = None

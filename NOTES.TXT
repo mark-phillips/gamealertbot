@@ -15,6 +15,28 @@ python C:\ProgramFilesx86\Google\google_appengine\appcfg.py update ..\ytmt
 
 =======================================================================
 
+LINUX
+-----
+Deploy
+appcfg.py update ../gamealertbot
+
+Delete
+appcfg.py delete_version -V 2a  -A gamealertbot-hrd
+
+=======================================================================
+DEBUG
+=====
+Dshboard
+https://console.cloud.google.com/appengine?project=gamealertbot-hrd&serviceId=default&versionId=2&sortCol=creation&sortDir=DESC&duration=PT1H
+
+App
+https://2a-dot-gamealertbot-hrd.appspot.com/
+https://2a-dot-gamealertbot-hrd.appspot.com/twitter
+
+Docs
+http://docs.tweepy.org/en/v3.5.0/api.html#direct-message-methods
+=======================================================================
+
 Project Structure
 =================
 

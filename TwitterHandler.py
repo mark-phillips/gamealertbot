@@ -64,27 +64,26 @@ class TwitterHandler(webapp.RequestHandler):
                 logging.warning( 'Error: Failed to tweet to ' + target+ ". Message: " + message)
                 logging.warning( e)
 
-    def save_id(self,id,dmid):
+    def save_id(self,id):
         """Save last status ID to a file"""
         twitter = twitter_auth.get_by_key_name ("apikey")
         twitter.last_status_id = id
-        twitter.last_dm_id = id
         twitter.put()
         logging.debug( "Updated last id to  " + str(id) + "."  )
 
-#    def save_dm_id(self,dmid):
-#        """Save last status ID to a file"""
-#        twitter = twitter_auth.get_by_key_name ("apikey")
-#        twitter.last_dm_id = dmid
-#        twitter.put()
-#       logging.debug( "Updated last id to  " + str(id) + "."  )
+    def save_dm_id(self,dmid):
+        """Save last status ID to a file"""
+        twitter = twitter_auth.get_by_key_name ("apikey")
+        twitter.last_dm_id = dmid
+        twitter.put()
+        logging.debug( "Updated last dmid to  " + str(id) + "."  )
 
     def get_last_id(self):
         """Retrieve last status ID from a file"""
         twitter = twitter_auth.get_by_key_name ("apikey")
         #if twitter.last_status_id != None:
         #        logging.debug( "Got last id " + str(twitter.last_status_id) + "."  )
-        return twitter.last_status_id
+        return twitter
 
     def respond_to_mention(self, mention):
         """respond_to_mention"""
@@ -113,6 +112,8 @@ class TwitterHandler(webapp.RequestHandler):
             new_user.put()
             logging.debug( "Added " + name + " for : " + twittername )
             reply = "You will receive alerts when it is " + name + "'s turn on YTMT. Tweet \"remove " + name + "\" to stop."
+            #api = self.twitter_login()
+            #api.create_friendship(twittername)           
         else:
             reply = "No name given for add request - syntax: add {ytmt-user}"
         return reply
@@ -127,6 +128,8 @@ class TwitterHandler(webapp.RequestHandler):
                     logging.debug( "Removed record.  twitter_id: " + u.twitter_id + " ytmt_id: " + u.ytmt_id  )
                     u.delete()
                     reply = name + " removed.  You will no longer receive alerts when it is " + name + "'s turn on YTMT."
+                    #api = self.twitter_login()
+                    #api.destroy_friendship(twittername)           
         else:
             reply = "No name given for remove request - syntax: remove {ytmt-user}"
         return reply
@@ -134,22 +137,31 @@ class TwitterHandler(webapp.RequestHandler):
 
     def get(self):
         """Get recent mentions."""
-        last_id = self.get_last_id()
+        twitter_ids = self.get_last_id()
+
         api = self.twitter_login()
-        mymentions = api.mentions_timeline(since_id=last_id)
+        mymentions = api.mentions_timeline(since_id=twitter_ids.last_status_id)
+        mydms = api.direct_messages(since_id=twitter_ids.last_dm_id)
         # want these in ascending order, api orders them descending
         mymentions.reverse()
+        mydms.reverse()
 
         self.response.out.write('<html><body>')
         self.response.out.write('<h1>Tweets</h1>')
         if mymentions == None or len(mymentions) == 0:
             self.response.out.write('No mentions.')
-        else:
+        if mydms == None or len(mydms) == 0:
+            self.response.out.write('No direct messages.')
+        if mydms != None or mymentions != None:
             self.response.out.write( "<ul>" )
             for mention in mymentions:
-                self.response.out.write( "<li>from @" + mention.user.screen_name.lower() + " text: \"" + mention.text + "\", id: " + str(mention.id) )
+                self.response.out.write( "<li>tweet from @" + mention.user.screen_name.lower() + " text: \"" + mention.text + "\", id: " + str(mention.id) )
                 self.respond_to_mention(mention)
                 self.save_id(mention.id)
+            for dm in mydms:
+                self.response.out.write( "<li>dm from @" + dm.sender.screen_name.lower() + " text: \"" + dm.text + "\", id: " + str(dm.id) )
+#                self.respond_to_mention(mention)
+                self.save_dm_id(dm.id)
             self.response.out.write( "</ul>" )
         self.response.out.write( "<hr>" )
         self.response.out.write(   "</body></html>"   )

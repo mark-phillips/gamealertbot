@@ -27,7 +27,7 @@ from google.appengine.ext.webapp import xmpp_handlers
 import re, string, time
 logging.basicConfig(level=logging.DEBUG,)
 
-from bot import *
+from XmppHandler import *
 from TwitterHandler import *
 from gamedb import Game
 from userdb import User
